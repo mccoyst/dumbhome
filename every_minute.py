@@ -35,11 +35,8 @@ def astro_temp():
 hat = SenseHat()
 hat.set_rotation(0)
 hat.low_light = True
-hat.load_image(imgs + '/choco.png')
-
 
 t = astro_temp()
-h = hat.get_humidity()
 
 if t < 15.5:
 	hat.load_image(imgs + '/cold.png')
