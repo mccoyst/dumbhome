@@ -1,0 +1,10 @@
+[Unit]
+Description=Dumb Home
+
+[Service]
+Restart=always
+User=sm
+ExecStart=/home/sm/bin/dumbhome
+
+[Install]
+WantedBy=multi-user.target
