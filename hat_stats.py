@@ -40,7 +40,5 @@ def astro_temp():
 	c = cpu_temp()
 	return ((t+p+h)/3) - (c/5)
 
-print('{0:.2f} or {2:.2f} ({1:.2f})'.format(correct(t0), t0, correct2(t0)))
-print('{0:.2f} or {2:.2f} ({1:.2f})'.format(correct(t1), t1, correct2(t1)))
 print('{0:.2f}'.format(astro_temp()))
-print('{0:.2f}%'.format(sense.get_humidity()))
+print('{0:.2f}'.format(sense.get_humidity()))
