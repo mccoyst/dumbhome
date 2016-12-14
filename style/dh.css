@@ -1,4 +1,5 @@
 @import url(https://code.cdn.mozilla.net/fonts/fira.css);
+@import url(http://mccoy.space/style/charter.css);
 
 body {
 	margin: 0;
@@ -12,7 +13,7 @@ header {
 	font-size: 200%;
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
-	font-family: "Athelas", "Lucida Bright", Georgia, serif;
+	font-family: "Charter Regular", Georgia, serif;
 }
 
 span.myname {
