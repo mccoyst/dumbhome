@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"html/template"
-	"image/color"
 	"log"
 	"net/http"
 
@@ -64,7 +63,6 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("today inside", err)
 		return
 	}
-	p.Y.Label.Text = "°C"
 	p.HideX()
 	s, err := plotter.NewScatter(today)
 	if err != nil {
@@ -72,7 +70,6 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("add inside scatters", err)
 		return
 	}
-	s.GlyphStyle.Color = color.Black
 	p.Add(s)
 	err = p.Save(4*vg.Inch, 2*vg.Inch, "/home/sm/dumbhome/plots/inside.svg")
 	if err != nil {
@@ -93,7 +90,6 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("today outside", err)
 		return
 	}
-	p.Y.Label.Text = "°C"
 	p.HideX()
 	s, err = plotter.NewScatter(today)
 	if err != nil {
@@ -101,7 +97,6 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("add inside scatters", err)
 		return
 	}
-	s.GlyphStyle.Color = color.Black
 	p.Add(s)
 	if err != nil {
 		w.Write([]byte(err.Error()))
