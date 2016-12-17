@@ -13,10 +13,15 @@
 </header>
 
 <div class="page">
-<h1>Hat stats</h1>
+<h1>The latest indoor stats</h1>
 <ul>
-<li>{{.PiTemperature}}°C</li>
-<li>{{.PiHumidity}}%</li>
+<li>{{printf "%.1f" .PiTemperature}}°C</li>
+<li>{{printf "%.0f" .PiHumidity}}%</li>
+</ul>
+<h1>The latest outdoor stats</h1>
+<ul>
+<li>{{printf "%.1f" .WeatherTemperature}}°C</li>
+<li>{{printf "%.0f" .WeatherHumidity}}%</li>
 </ul>
 </div>
 

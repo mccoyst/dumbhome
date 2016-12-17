@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bytes"
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
-	"os/exec"
+
+	_ "rsc.io/sqlite"
 )
 
 var templates = template.Must(template.ParseGlob("/home/sm/dumbhome/pages/*.html"))
@@ -22,17 +23,36 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("/home/sm/dumbhome/hat_stats.py")
-	o, err := cmd.Output()
+	db, err := sql.Open("sqlite3", "/home/sm/dumbhome/readings.db")
 	if err != nil {
 		w.Write([]byte(err.Error()))
-		log.Println("exec", err)
+		log.Println("db open", err)
+		return
 	}
-	lines := bytes.Split(o, []byte{'\n'})
+	defer db.Close()
+	var t int
+	var c, h, wc, wh float64
+	row := db.QueryRow("select max(time),temp_c,humidity from inside")
+	err = row.Scan(&t, &c, &h)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("db inside query", err)
+		return
+	}
+	row = db.QueryRow("select max(time),temp_c,humidity from outside")
+	err = row.Scan(&t, &wc, &wh)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("db outside query", err)
+		return
+	}
+
 	err = templates.ExecuteTemplate(w, "index.html", struct{
-		PiTemperature string
-		PiHumidity string
-		}{ string(lines[0]), string(lines[1]) })
+		PiTemperature float64
+		PiHumidity float64
+		WeatherTemperature float64
+		WeatherHumidity float64
+		}{ c, h, wc, wh })
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		log.Println("index template", err)

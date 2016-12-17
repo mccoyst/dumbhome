@@ -5,6 +5,7 @@
 
 from sense_hat import SenseHat
 import os
+import sqlite3
 import sys
 
 if len(sys.argv) < 2:
@@ -37,6 +38,14 @@ hat.set_rotation(0)
 hat.low_light = True
 
 t = astro_temp()
+h = hat.get_humidity()
+
+db = sqlite3.connect('/home/sm/dumbhome/readings.db')
+db.execute('create table if not exists inside (time integer, temp_c real, humidity real)')
+db.execute("insert into inside values (strftime('%s', 'now'),?,?)", [t, h])
+db.execute("delete from inside where time < (strftime('%s','now') - 60*60*24*7)")
+db.commit()
+db.close()
 
 if t < 15.5:
 	hat.load_image(imgs + '/cold.png')
