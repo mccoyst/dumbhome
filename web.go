@@ -3,15 +3,20 @@ package main
 import (
 	"database/sql"
 	"html/template"
+	"image/color"
 	"log"
 	"net/http"
 
+	"github.com/gonum/plot"
+	"github.com/gonum/plot/plotter"
+	"github.com/gonum/plot/vg"
 	_ "rsc.io/sqlite"
 )
 
 var templates = template.Must(template.ParseGlob("/home/sm/dumbhome/pages/*.html"))
 
 func main() {
+	http.Handle("/plots/", http.FileServer(http.Dir("/home/sm/dumbhome")))
 	http.Handle("/style/", http.FileServer(http.Dir("/home/sm/dumbhome")))
 	http.HandleFunc("/", doIndex)
 	log.Fatal(http.ListenAndServe(":8000", nil))
@@ -47,6 +52,71 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p, err := plot.New()
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("new plot", err)
+		return
+	}
+	today, err := pastDayReadings(db, "inside")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("today inside", err)
+		return
+	}
+	p.Y.Label.Text = "°C"
+	p.HideX()
+	s, err := plotter.NewScatter(today)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("add inside scatters", err)
+		return
+	}
+	s.GlyphStyle.Color = color.Black
+	p.Add(s)
+	err = p.Save(4*vg.Inch, 2*vg.Inch, "/home/sm/dumbhome/plots/inside.svg")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("save inside scatters", err)
+		return
+	}
+
+	p, err = plot.New()
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("new plot", err)
+		return
+	}
+	today, err = pastDayReadings(db, "outside")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("today outside", err)
+		return
+	}
+	p.Y.Label.Text = "°C"
+	p.HideX()
+	s, err = plotter.NewScatter(today)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("add inside scatters", err)
+		return
+	}
+	s.GlyphStyle.Color = color.Black
+	p.Add(s)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("add outside scatters", err)
+		return
+	}
+	err = p.Save(4*vg.Inch, 2*vg.Inch, "/home/sm/dumbhome/plots/outside.svg")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("save outside scatters", err)
+		return
+	}
+
+
+
 	err = templates.ExecuteTemplate(w, "index.html", struct{
 		PiTemperature float64
 		PiHumidity float64
@@ -57,4 +127,32 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		log.Println("index template", err)
 	}
+}
+
+func pastDayReadings(db *sql.DB, table string) (plotter.XYs, error) {
+	rows, err := db.Query("select time,temp_c from " + table + " where time > strftime('%s','now') - 24*60*60")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var xys plotter.XYs
+	for rows.Next() {
+		var t int
+		var c float64
+		err = rows.Scan(&t, &c)
+		if err != nil {
+			return nil, err
+		}
+		xy := struct{
+			X float64
+			Y float64
+			}{ float64(t), c }
+		xys = append(xys, xy)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return xys, nil
 }
