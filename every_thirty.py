@@ -18,8 +18,9 @@ if r.status == 200:
 	w = json.loads(j)
 	t = w['current_observation']['temp_c']
 	h = w['current_observation']['relative_humidity'].rstrip('%')
-	db.execute("insert into outside values (strftime('%s','now'),?,?)", [t, h])
-	db.execute("delete from outside where time < (strftime('%s','now') - 60*60*24*7)")
-	db.commit()
+	if t:
+		db.execute("insert into outside values (strftime('%s','now'),?,?)", [t, h])
+		db.execute("delete from outside where time < (strftime('%s','now') - 60*60*24*7)")
+		db.commit()
 
 db.close()
