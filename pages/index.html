@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style/dh.css">
 <title>Dumb Home</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
 </head>
 
 <body>
@@ -13,19 +14,57 @@
 </header>
 
 <div class="page">
-<h1>The latest indoor stats</h1>
+<h1>The latest stats</h1>
 <ul>
-<li>{{printf "%.1f" .PiTemperature}}°C</li>
-<li>{{printf "%.0f" .PiHumidity}}%</li>
+<li>{{printf "%.1f" .PiTemperature}}°C Inside</li>
+<li>{{printf "%.1f" .WeatherTemperature}}°C Outside</li>
+<li>{{printf "%.0f" .PiHumidity}}% Inside</li>
+<li>{{printf "%.0f" .WeatherHumidity}}% Outside</li>
 </ul>
-<img src="plots/inside.svg">
-<h1>The latest outdoor stats</h1>
-<ul>
-<li>{{printf "%.1f" .WeatherTemperature}}°C</li>
-<li>{{printf "%.0f" .WeatherHumidity}}%</li>
-</ul>
-<img src="plots/outside.svg">
+<canvas id="inside" width="400" height="200"></canvas>
 </div>
+
+<script>
+var c = document.getElementById('inside');
+var ch = new Chart(c, {
+	type: 'line',
+	data: {
+		datasets: [{
+			fill: false,
+			label: 'ºC Inside',
+			data: [
+{{range .PiDay}}
+{ x: {{.X}}, y: {{.Y}} },
+{{end}}
+			],
+			borderWidth: 1
+		}, {
+			fill: false,
+			label: 'ºC Outside',
+			data: [
+{{range .WeatherDay}}
+{ x: {{.X}}, y: {{.Y}} },
+{{end}}
+			],
+			borderWidth: 1
+
+		}]
+	},
+	options: {
+		showLines: false,
+		legend: {
+			display: false
+		},
+		scales: {
+			xAxes: [{
+				type: 'time',
+				position: 'bottom',
+				display: false,
+			}]
+		}
+	}
+});
+</script>
 
 </body>
 </html>
