@@ -53,6 +53,12 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("today inside", err)
 		return
 	}
+	pastHours := todayIn[len(todayIn)-4*60:]
+	pastQuarters := make([]xy, len(todayIn)/15)
+	for i := range pastQuarters {
+		pastQuarters[i] = todayIn[i*15]
+	}
+	todayIn = append(pastQuarters, pastHours...)
 	todayOut, err := pastDayReadings(db, "outside")
 	if err != nil {
 		w.Write([]byte(err.Error()))
