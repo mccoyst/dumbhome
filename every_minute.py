@@ -46,7 +46,7 @@ db.execute('create table if not exists refs (reading real, reference real)')
 db.commit()
 refs = db.execute('select * from refs order by reading').fetchall()
 db.close()
-i = bisect.bisect_left(refs, t)
+i = bisect.bisect_left([r[0] for r in refs], t)
 if i > 0:
 	l, lref = refs[i-1]
 	h, href = refs[i]
