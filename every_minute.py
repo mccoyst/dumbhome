@@ -4,6 +4,7 @@
 # video input gpio i2c
 
 from sense_hat import SenseHat
+import bisect
 import os
 import sqlite3
 import sys
@@ -39,6 +40,17 @@ hat.low_light = True
 
 t = astro_temp()
 h = hat.get_humidity()
+
+db = sqlite3.connect('/home/sm/dumbhome/refs.db')
+db.execute('create table if not exists refs (reading real, reference real)')
+db.commit()
+refs = db.execute('select * from refs order by reading').fetchall()
+db.close()
+i = bisect.bisect_left(refs, t)
+if i > 0:
+	l, lref = refs[i-1]
+	h, href = refs[i]
+	t = (t - l) * (href - lref) / (h - l) + lref
 
 db = sqlite3.connect('/home/sm/dumbhome/readings.db')
 db.execute('create table if not exists inside (time integer, temp_c real, humidity real)')

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "rsc.io/sqlite"
 )
@@ -13,6 +14,7 @@ var templates = template.Must(template.ParseGlob("/home/sm/dumbhome/pages/*.html
 
 func main() {
 	http.Handle("/style/", http.FileServer(http.Dir("/home/sm/dumbhome")))
+	http.HandleFunc("/cal_t", doCalibrateTemp)
 	http.HandleFunc("/", doIndex)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
@@ -112,4 +114,38 @@ func pastDayReadings(db *sql.DB, table string) ([]xy, error) {
 	}
 
 	return xys, nil
+}
+
+func doCalibrateTemp(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	reading, err := strconv.ParseFloat(r.FormValue("reading"), 64)
+	if err != nil {
+		http.Error(w, "bad reading " +r.Form.Get("reading"), http.StatusBadRequest)
+		return
+	}
+	reference, err := strconv.ParseFloat(r.FormValue("reference"), 64)
+	if err != nil {
+		http.Error(w, "bad reference " +r.Form.Get("reference"), http.StatusBadRequest)
+		return
+	}
+	db, err := sql.Open("sqlite3", "/home/sm/dumbhome/refs.db")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("db open", err)
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("insert into refs values (?,?)", reading, reference)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		log.Println("db exec", err)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }
