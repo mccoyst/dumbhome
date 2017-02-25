@@ -47,7 +47,7 @@ db.commit()
 refs = db.execute('select * from refs order by reading').fetchall()
 db.close()
 i = bisect.bisect_left([r[0] for r in refs], t)
-if i > 0:
+if i > 0 and i < len(refs):
 	l, lref = refs[i-1]
 	h, href = refs[i]
 	t = (t - l) * (href - lref) / (h - l) + lref
