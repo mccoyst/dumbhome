@@ -7,7 +7,7 @@ hat_in := \
 	every_minute.py \
 	every_thirty.py \
 
-hat_out := $(patsubst, %,$(bin_dir)/%,$(hat_in))
+hat_out := $(patsubst %,$(bin_dir)/%,$(hat_in))
 
 resources_in := \
 	$(wildcard *.png) \
