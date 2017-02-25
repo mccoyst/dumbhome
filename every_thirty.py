@@ -7,8 +7,11 @@ import sys
 if len(sys.argv) < 2:
 	sys.exit('I need the wunderground key pathname.')
 
+if len(sys.argv) < 3:
+	sys.exit('I need the path to the db.')
+
 key = open(sys.argv[1]).readline().strip()
-db = sqlite3.connect('/home/sm/dumbhome/readings.db')
+db = sqlite3.connect(sys.argv[2]+'/readings.db')
 db.execute('create table if not exists inside (time integer, temp_c real, humidity real)')
 db.execute('create table if not exists outside (time integer, temp_c real, humidity real)')
 

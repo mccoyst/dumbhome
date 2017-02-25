@@ -10,7 +10,7 @@ import sqlite3
 import sys
 
 if len(sys.argv) < 2:
-	print('I need the path to the image folder.')
+	print('I need the path to the image/db folder.')
 	sys.exit(1)
 
 imgs = sys.argv[1]
@@ -41,7 +41,7 @@ hat.low_light = True
 t = astro_temp()
 h = hat.get_humidity()
 
-db = sqlite3.connect('/home/sm/dumbhome/refs.db')
+db = sqlite3.connect(imgs+'/refs.db')
 db.execute('create table if not exists refs (reading real, reference real)')
 db.commit()
 refs = db.execute('select * from refs order by reading').fetchall()
@@ -52,7 +52,7 @@ if i > 0:
 	h, href = refs[i]
 	t = (t - l) * (href - lref) / (h - l) + lref
 
-db = sqlite3.connect('/home/sm/dumbhome/readings.db')
+db = sqlite3.connect(imgs+'/readings.db')
 db.execute('create table if not exists inside (time integer, temp_c real, humidity real)')
 db.execute("insert into inside values (strftime('%s', 'now'),?,?)", [t, h])
 db.execute("delete from inside where time < (strftime('%s','now') - 60*60*24*7)")

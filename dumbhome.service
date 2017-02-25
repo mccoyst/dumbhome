@@ -4,7 +4,7 @@ Description=Dumb Home
 [Service]
 Restart=always
 User=sm
-ExecStart=/home/sm/bin/dumbhome
+ExecStart=/home/sm/bin/dumbhome -d /home/sm/dumbhome
 
 [Install]
 WantedBy=multi-user.target

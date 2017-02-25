@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,10 +11,15 @@ import (
 	_ "rsc.io/sqlite"
 )
 
-var templates = template.Must(template.ParseGlob("/home/sm/dumbhome/pages/*.html"))
+var resourceDir = flag.String("d", ".", "path to images, tempates, etc.")
+
+var templates *template.Template
 
 func main() {
-	http.Handle("/style/", http.FileServer(http.Dir("/home/sm/dumbhome")))
+	flag.Parse()
+	templates = template.Must(template.ParseGlob(*resourceDir+"/pages/*.html"))
+
+	http.Handle("/style/", http.FileServer(http.Dir(*resourceDir)))
 	http.HandleFunc("/cal_t", doCalibrateTemp)
 	http.HandleFunc("/", doIndex)
 	log.Fatal(http.ListenAndServe(":8000", nil))
@@ -25,7 +31,7 @@ func doIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := sql.Open("sqlite3", "/home/sm/dumbhome/readings.db")
+	db, err := sql.Open("sqlite3", *resourceDir+"/readings.db")
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		log.Println("db open", err)
@@ -132,7 +138,7 @@ func doCalibrateTemp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad reference " +r.Form.Get("reference"), http.StatusBadRequest)
 		return
 	}
-	db, err := sql.Open("sqlite3", "/home/sm/dumbhome/refs.db")
+	db, err := sql.Open("sqlite3", *resourceDir+"/refs.db")
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		log.Println("db open", err)
