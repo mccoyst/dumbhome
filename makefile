@@ -6,6 +6,7 @@ resource_dir := $(GOPATH)/dumbhome
 hat_in := \
 	every_minute.py \
 	every_thirty.py \
+	calibrate.py \
 
 hat_out := $(patsubst %,$(bin_dir)/%,$(hat_in))
 

@@ -24,7 +24,6 @@
 <h1>Today's temperatures</h1>
 <canvas id="inside" width="400" height="200"></canvas>
 <form id="calibrate" name="calibrate" method="POST" action="/cal_t">
-<input id="reading" name="reading" type="hidden" value="{{.PiTemperature}}">
 <input id="reference" name="reference" type="text">
 <button type="submit">Calibrate</button>
 </form>

@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os/exec"
 	"strconv"
 
 	_ "rsc.io/sqlite"
@@ -128,28 +129,17 @@ func doCalibrateTemp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reading, err := strconv.ParseFloat(r.FormValue("reading"), 64)
+	_, err := strconv.ParseFloat(r.FormValue("reference"), 64)
 	if err != nil {
-		http.Error(w, "bad reading " +r.Form.Get("reading"), http.StatusBadRequest)
+		http.Error(w, "bad reference " +r.FormValue("reference"), http.StatusBadRequest)
 		return
 	}
-	reference, err := strconv.ParseFloat(r.FormValue("reference"), 64)
-	if err != nil {
-		http.Error(w, "bad reference " +r.Form.Get("reference"), http.StatusBadRequest)
-		return
-	}
-	db, err := sql.Open("sqlite3", *resourceDir+"/refs.db")
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		log.Println("db open", err)
-		return
-	}
-	defer db.Close()
 
-	_, err = db.Exec("insert into refs values (?,?)", reading, reference)
+	cmd := exec.Command("calibrate.py", *resourceDir, r.FormValue("reference"))
+	err = cmd.Run()
 	if err != nil {
 		w.Write([]byte(err.Error()))
-		log.Println("db exec", err)
+		log.Println("calibrate exec", err)
 		return
 	}
 
