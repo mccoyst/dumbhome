@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style/dh.css">
 <title>Dumb Home</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
 </head>
 
 <body>
@@ -18,62 +17,10 @@
 <ul>
 <li>{{printf "%.1f" .PiTemperature}}°C Inside</li>
 <li>{{printf "%.1f" .WeatherTemperature}}°C Outside</li>
-<li>{{printf "%.0f" .PiHumidity}}% Inside</li>
-<li>{{printf "%.0f" .WeatherHumidity}}% Outside</li>
+<li>"{{.PiHumidity}}"</li>
+<li>"{{.WeatherHumidity}}"</li>
 </ul>
-<h1>Today's temperatures</h1>
-<canvas id="inside" width="400" height="200"></canvas>
-<form id="calibrate" name="calibrate" method="POST" action="/cal_t">
-<input id="reference" name="reference" type="text">
-<button type="submit">Calibrate</button>
-</form>
 </div>
-
-<script>
-Chart.defaults.global.defaultFontFamily = 'Fira Sans';
-var c = document.getElementById('inside');
-var ch = new Chart(c, {
-	type: 'line',
-	data: {
-		datasets: [{
-			fill: false,
-			label: 'ºC Inside',
-			data: [
-{{range .PiDay}}
-{ x: {{.X}}, y: {{.Y}} },
-{{end}}
-			],
-			pointBackgroundColor: '#f84',
-			borderWidth: 1
-		}, {
-			fill: false,
-			label: 'ºC Outside',
-			data: [
-{{range .WeatherDay}}
-{ x: {{.X}}, y: {{.Y}} },
-{{end}}
-			],
-			pointStyle: 'rect',
-			pointBackgroundColor: '#248',
-			borderWidth: 1
-
-		}]
-	},
-	options: {
-		showLines: false,
-		legend: {
-			display: false
-		},
-		scales: {
-			xAxes: [{
-				type: 'time',
-				position: 'bottom',
-				display: false,
-			}]
-		}
-	}
-});
-</script>
 
 </body>
 </html>
