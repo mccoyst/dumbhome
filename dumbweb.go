@@ -127,7 +127,7 @@ func recordTemp(w http.ResponseWriter, r *http.Request) {
 
 func estimateDewpoint(t, h float64) string {
 	// https://www.sciencedaily.com/releases/2005/03/050329133131.htm
-	d := t - 100*(1-h)/5
+	d := t - (100-h)/5
 	// https://youtu.be/GtmOlpbkQDw
 	if t < 0 || d < 15.6 {
 		return "seems cold"
