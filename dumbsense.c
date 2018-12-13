@@ -1,3 +1,5 @@
+//+build ignore
+
 #include <ArduinoHttpClient.h>
 //#include <WiFi101.h>
 #include <ESP8266WiFi.h>
