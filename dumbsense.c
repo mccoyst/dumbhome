@@ -65,5 +65,10 @@ void loop() {
   Serial.print("Response: ");
   Serial.println(response);
 
-  delay(10000);
+  if(statusCode < 0) {
+    // Let's not wait a full minute if there was a network hiccup.
+    delay(5000);
+  }else{
+    delay(60000);
+  }
 }
