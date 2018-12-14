@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "rsc.io/sqlite"
@@ -27,7 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wunderkey = string(wk)
+	wunderkey = strings.TrimSpace(string(wk))
 
 	go weatherReport()
 
@@ -138,43 +140,74 @@ func estimateDewpoint(t, h float64) string {
 	return "probably fine"
 }
 
+type wunderStuff struct {
+	Current struct {
+		Condition string `json:"weather"`
+		T float64 `json:"temp_c"`
+		H string `json:"relative_humidity"`
+	} `json:"current_observation"`
+}
+
 func weatherReport() {
-/*
-	api := "http://api.wunderground.com/api/"+wunderkey+"/conditions/q/"+*zipcode+".json"
-	tt := time.Tick(30 * time.Minute)
-	for now := range tt {
-		r, err := http.Get(api)
+	tt := time.Tick(5 * time.Minute)
+	for _ = range tt {
+		blob, err := fetchWunder()
 		if err != nil {
 			log.Println("OOPS:", err)
 			continue
 		}
-		if r.StatusCode != 200 {
-			log.Println("OOPS:", r.Status)
-			r.Body.Close()
+		if blob == nil {
 			continue
 		}
 
-		blob, err := ioutile.ReadAll(r.Body)
-		r.Body.Close()
-		if err != nil {
-			log.Println("OOPS:", err)
-			continue
-		}
+log.Println(string(blob))
 
-		var data map[string]interface{}
-		err = json.Unmarshall(blob, &data)
+		var data wunderStuff
+		err = json.Unmarshal(blob, &data)
 		if err != nil {
 			log.Println("OOPS:", err)
 			continue
 		}
 
-		current, ok := data.(map[string]string)
-		if !ok {
-			log.Println("OOPS:", "Not the JSON I expected", string(blob))
+		h, err := strconv.ParseFloat(data.Current.H[:len(data.Current.H)-1], 64)
+		if err != nil {
+			log.Println("OOPS:", err)
 			continue
 		}
 
-		
+		log.Println("WUNDER:", data.Current.Condition, data.Current.T, data.Current.H)
+		recordInside(data.Current.T, h)
 	}
-*/
+}
+
+func fetchWunder() ([]byte, error) {
+	api := "http://api.wunderground.com/api/"+wunderkey+"/conditions/q/"+*zipcode+".json"
+	r, err := http.Get(api)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Body.Close()
+
+	if r.StatusCode != 200 {
+		log.Println("OOPS:", r.Status)
+		return nil, nil
+	}
+
+	return ioutil.ReadAll(r.Body)
+}
+
+func recordInside(t, h float64) {
+	db, err := sql.Open("sqlite3", *resourceDir+"/readings.db")
+	if err != nil {
+		log.Println("db open", err)
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("insert into outside (time, temp_c, humidity) values (?, ?, ?)",
+		time.Now().Unix(), t, h)
+	if err != nil {
+		log.Println("db insert 'outside'", err)
+		return
+	}
 }
