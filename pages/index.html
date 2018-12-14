@@ -13,13 +13,20 @@
 </header>
 
 <div class="page">
-<h1>The latest stats</h1>
+<div style="float:left;padding-right:1em">
+<h1>Inside</h1>
 <ul>
-<li>{{printf "%.1f" .PiTemperature}}°C Inside</li>
-<li>{{printf "%.1f" .WeatherTemperature}}°C Outside</li>
+<li>{{printf "%.0f" .PiTemperature}}°C</li>
 <li>"{{.PiHumidity}}"</li>
+</ul>
+</div>
+<div style="float:left;padding-left:1em">
+<h1>Outside</h1>
+<ul>
+<li>{{printf "%.0f" .WeatherTemperature}}°C</li>
 <li>"{{.WeatherHumidity}}"</li>
 </ul>
+</div>
 </div>
 
 </body>
