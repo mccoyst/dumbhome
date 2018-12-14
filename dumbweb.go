@@ -149,7 +149,7 @@ type wunderStuff struct {
 }
 
 func weatherReport() {
-	tt := time.Tick(5 * time.Minute)
+	tt := time.Tick(30 * time.Minute)
 	for _ = range tt {
 		blob, err := fetchWunder()
 		if err != nil {
